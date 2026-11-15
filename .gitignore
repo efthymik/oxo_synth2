@@ -19,3 +19,5 @@ app_store_screenshots/
 OxoSynth2VST3/build-preview/
 Windows_Build/build-*/
 Linux_Build/build.*.log
+linux-port-lice/build.*.log
+linux-port-lice/HostTest/xgrab

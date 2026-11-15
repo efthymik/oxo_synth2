@@ -14,6 +14,10 @@
 
 #if SMTG_OS_MACOS
 #include "OxoSynth2EditorView.h"
+#elif defined(OXO_LINUX_EDITOR_LICE)
+// The alternative Linux panel (linux-port-lice/): raw xcb + LICE. Its CMake
+// project defines OXO_LINUX_EDITOR_LICE; Linux_Build/ never does.
+#include "LinuxEditor.hpp"
 #elif SMTG_OS_WINDOWS || (SMTG_OS_LINUX && defined(OXO_LINUX_EDITOR))
 #include "DesktopEditor/DesktopEditor.hpp"
 #endif
@@ -143,6 +147,8 @@ tresult PLUGIN_API OxoSynth2Controller::setComponentState(IBStream *state) {
 IPlugView *PLUGIN_API OxoSynth2Controller::createView(FIDString name) {
 #if SMTG_OS_MACOS
     if (name && strcmp(name, Vst::ViewType::kEditor) == 0) return new OxoSynth2EditorView(this);
+#elif defined(OXO_LINUX_EDITOR_LICE)
+    if (name && strcmp(name, Vst::ViewType::kEditor) == 0) return new LinuxEditor(this);
 #elif SMTG_OS_WINDOWS || (SMTG_OS_LINUX && defined(OXO_LINUX_EDITOR))
     if (name && strcmp(name, Vst::ViewType::kEditor) == 0) return new DesktopEditor(this);
 #else

@@ -135,6 +135,20 @@ fontconfig and zlib development packages (Debian / Ubuntu:
 Settings and themes are kept in `~/.config/Oxo Music/Oxo Synth2/`, banks in
 `~/Documents/Oxo Music/Oxo Synth2/`. Details: [Linux_Build/README.md](Linux_Build/README.md).
 
+#### Alternative panel (LICE)
+
+[`linux-port-lice/`](linux-port-lice/README.md) is a second Linux editor for
+those who prefer the panel drawn on LICE instead of cairo: raw xcb + LICE
+(Cockos WDL), system FreeType text, in-panel menus and dialogs, no GTK / Qt /
+cairo. Same plugin, engine and files as above; only the editor differs.
+
+```sh
+./build_linux_lice.sh   # builds linux-port-lice/build/VST3/Release/OxoSynth2.vst3
+```
+
+Dependencies: the same packages minus X11 / cairo, plus libxcb and
+libxcb-keysyms. Details: [linux-port-lice/README.md](linux-port-lice/README.md).
+
 ### Tests
 
 ```sh
@@ -187,6 +201,7 @@ on first run. `--help` lists the options.
 | `DesktopEditor/` | The Windows and Linux editor (GDI+ panel; each platform adds its window) |
 | `Windows_Build/` | Windows VST3: CMake project, the editor's Win32 window, vendored zlib |
 | `Linux_Build/` | Linux VST3: CMake project, the editor's X11 window, GDI+ on cairo |
+| `linux-port-lice/` | Alternative Linux editor: CMake project, xcb + LICE panel, vendored LICE, a test host |
 | `OxoSynth2.xcodeproj`, `OxoSynth2/`, `OxoSynth2AudioUnit/` | iPad app (an "open it in a host" screen) + AUv3 extension |
 | `EngineCoreTests/` | Engine unit tests |
 | `tools/s1ref/` | Black-box harness for the original Synth1 + the measurement / fitting scripts |

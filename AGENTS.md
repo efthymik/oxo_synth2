@@ -220,6 +220,30 @@ VERSION: MARKETING_VERSION / CURRENT_PROJECT_VERSION in `Identity.xcconfig`
   folder>`, library = the desktop's Documents (`XDG_DOCUMENTS_DIR` in
   user-dirs.dirs, else ~/Documents). Compile check of our Linux files:
   `-Wall -Wextra` clean, GCC 12+.
+- `linux-port-lice/` — the ALTERNATIVE Linux editor (fork branch, not in the
+  release): CMake project (same `Identity.xcconfig` parse) defining
+  `OXO_LINUX_EDITOR_LICE`, which `OxoSynth2VST3/source/OxoSynth2Controller.cpp`
+  builds instead of `DesktopEditor` (the two branches coexist; `Linux_Build/`
+  never defines the macro). `Source/LinuxEditor.{hpp,cpp}` = the `IPlugView`:
+  an XEmbed window on raw **xcb** (`LinuxX11.{hpp,cpp}`, one connection per
+  editor, `_XEMBED_INFO` at creation, focus on click, the LICE image blitted
+  with `xcb_put_image`) + `LinuxPanel.{hpp,cpp}` (the SwiftUI panel transcribed
+  to LICE: all input, menus, dialogs, the 30 Hz poll) + `LinuxCanvas.{hpp,cpp}`
+  (design -> device scaling, rounded faces / rings / gradients) +
+  `LinuxText.{hpp,cpp}` (system FreeType: hinted glyphs, fontconfig fallback,
+  the desktop's Xft hinting / subpixel from RESOURCE_MANAGER; grayscale under
+  Wayland) + `LinuxTrash.cpp` (XDG home trash) + `LiceSwellStubs.cpp`.
+  `Dependencies/wdl/` = vendored LICE (`VENDOR.md`: WDL `6a67ec57`,
+  zlib/libpng, core rasterizer only). Data / library: the shared
+  `EditorCore/Storage.hpp` (so it compiles against
+  `Linux_Build/Source/LinuxStorage.hpp`). `build_linux_lice.sh` runs
+  `tools/check_deps.sh`: NEEDED = libc, libm, libxcb, libxcb-keysyms,
+  libfreetype, libfontconfig, libz, libpthread / libdl (glibc < 2.34) (+ the
+  interpreter); exports = `GetPluginFactory`, `ModuleEntry`, `ModuleExit`
+  (`vst3.map`, `local: *`, `--exclude-libs,ALL`; static `-static-libgcc
+  -static-libstdc++`). Every host entry point runs inside `guard()`; menus,
+  dialogs and the file picker are drawn in-panel. `HostTest/` = the SDK
+  editorhost with its run loop fixed + `xsend` / `xgrab`.
 - `docs/images/` — README pictures (`synth2_preview.jpg`).
 - `third_party/` — submodules `vst3sdk` v3.8.1_build_84 (MIT) +
   `AudioUnitSDK` 1.4.0 (Apache 2.0); remaining patches: auwrapper hidden
@@ -344,6 +368,18 @@ VERSION: MARKETING_VERSION / CURRENT_PROJECT_VERSION in `Identity.xcconfig`
   `tools/win_check/check.sh` compile-checks the Windows sources with
   mingw-w64 (`brew install mingw-w64`; warnings = errors; the worktree's
   SDK or `VST3SDK=<path>`). `.bat` files are CRLF (`.gitattributes`).
+- LINUX (LICE panel, the alternative): `./build_linux_lice.sh` (configure
+  + build + `tools/check_deps.sh` + the SDK validator with a temporary HOME;
+  `--install` copies into `~/.vst3`) →
+  `linux-port-lice/build/VST3/Release/OxoSynth2.vst3`, validator at
+  `linux-port-lice/build/bin/Release/validator`. Needs CMake 3.25+,
+  `pkg-config` and the libxcb / xcb-keysyms / FreeType / fontconfig / zlib
+  dev packages. Editor work without a DAW:
+  `cmake -S linux-port-lice -B linux-port-lice/build -DOXO_HOST_TEST=ON`,
+  `cmake --build ... --target oxo_editorhost OxoSynth2VST3`, then
+  `HOME=$(mktemp -d) DISPLAY=:0 linux-port-lice/build/bin/Release/oxo_editorhost
+  linux-port-lice/build/VST3/Release/OxoSynth2.vst3` (driving / capturing:
+  `linux-port-lice/HostTest/README.md`).
 - LINUX RELEASE: GitHub Actions > "Linux release" > Run workflow (on the
   tag; manual only) → artifacts `<Product>-<ver>-<build>-Linux.tar.gz` +
   `.sha256` (not zipped): ONE bundle with `Contents/x86_64-linux` +
